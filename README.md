@@ -18,12 +18,20 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+Extend Bubot in your class.
 
-## Contributing
+This gives you the class method `.watch(:method_name, threshold)`.
 
-1. Fork it
-2. Create your feature branch (`git checkout -b my-new-feature`)
-3. Commit your changes (`git commit -am 'Add some feature'`)
-4. Push to the branch (`git push origin my-new-feature`)
-5. Create new Pull Request
+If a watched method takes longer than the specified amount of time (threshold), the block will execute.
+
+```ruby
+class Foo
+    extend Bubot
+
+    watch(:bar, 1) { run_some_code }
+
+    def bar
+        sleep 1.1
+    end
+end
+```
