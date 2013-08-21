@@ -1,6 +1,6 @@
 # Bubot
 
-TODO: Write a gem description
+Take action when methods take too long
 
 ## Installation
 
