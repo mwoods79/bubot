@@ -2,12 +2,12 @@ require "bubot/version"
 
 module Bubot
 
-  def watch(method_name, timeout, &block)
+  def watch(method_name, timeout=0)
     define_method("#{method_name}_with_feature") do
       start_time = Time.now
       response = send("#{method_name}_without_feature".to_sym)
       if (total_time = Time.now - start_time) > timeout
-        block.call(self, total_time)
+        yield(self, total_time)
       end
       response
     end

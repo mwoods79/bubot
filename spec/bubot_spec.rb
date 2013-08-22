@@ -60,6 +60,19 @@ describe Bubot do
       end
     end
 
+    context "timeout is optional" do
+      it "timeout is not passed" do
+        class NoTimeout
+          extend Bubot
+          watch(:without_timeout) { Baz.buz }
+          def without_timeout() end
+        end
+
+        Baz.should_receive(:buz).once
+        NoTimeout.new.without_timeout
+      end
+    end
+
     context "watching methods that are not defined" do
       it "does nothing and does not break" do
         expect do
@@ -71,7 +84,7 @@ describe Bubot do
       end
     end
 
-    context "do defining new methods" do
+    context "sending messages to strategy" do
       it "passes its instance to the strategy" do
         class RecievesSelfStrategy
           def self.execute(instance)
