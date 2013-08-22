@@ -92,6 +92,30 @@ describe Bubot do
 
         bubot_observed.pass_self
       end
+
+      it "passes the time it took to the strategy" do
+        class RecievesTimeStrategy
+          def self.execute(instance, time)
+            # do stuff
+          end
+        end
+
+        class PassesTime
+          extend Bubot
+          watch(:pass_time, 0.001) do |instance, time|
+            RecievesTimeStrategy.execute(instance, time)
+          end
+          def pass_time; sleep 0.002; end
+        end
+
+        bubot_observed = PassesTime.new
+        RecievesTimeStrategy.should_receive(:execute) do |instance, time|
+          expect(time).to be > 0.002
+          expect(instance).to be(bubot_observed)
+        end
+
+        bubot_observed.pass_time
+      end
     end
   end
 end
