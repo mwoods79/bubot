@@ -12,14 +12,18 @@ module Bubot
       response
     end
 
-    if instance_methods.include?(method_name)
+    alias_method_chain_or_register(method_name)
+  end
+
+  private
+
+  def alias_method_chain_or_register(method_name)
+    if method_defined?(method_name)
       alias_method_chain(method_name)
     else
       (@method_names ||= []).push(method_name)
     end
   end
-
-  private
 
   def method_added(method_name)
     if (@method_names ||= []).delete(method_name)
