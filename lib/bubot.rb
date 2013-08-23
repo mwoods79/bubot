@@ -5,11 +5,11 @@ module Bubot
   def watch(method_name, timeout=0)
     define_method("#{method_name}_with_feature") do
       start_time = Time.now
-      response = send("#{method_name}_without_feature".to_sym)
+      method_return_value = send("#{method_name}_without_feature".to_sym)
       if (total_time = Time.now - start_time) > timeout
-        yield(self, total_time)
+        yield(self, total_time, method_return_value)
       end
-      response
+      method_return_value
     end
 
     alias_method_chain_or_register(method_name)
