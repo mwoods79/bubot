@@ -3,9 +3,13 @@ require "bubot/version"
 module Bubot
 
   def watch(method_name, timeout=0)
-    define_method("#{method_name}_with_feature") do
+    define_method("#{method_name}_with_feature") do |*args, &block|
       start_time = Time.now
-      method_return_value = send("#{method_name}_without_feature".to_sym)
+      if block
+        method_return_value = send("#{method_name}_without_feature".to_sym, *args, &block)
+      else
+        method_return_value = send("#{method_name}_without_feature".to_sym, *args)
+      end
       if (total_time = Time.now - start_time) > timeout
         yield(self, total_time, method_return_value)
       end

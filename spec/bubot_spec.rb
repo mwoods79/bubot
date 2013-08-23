@@ -178,6 +178,48 @@ describe Bubot do
 
       end
 
+      it "accepts the original methods arguments" do
+        class OriginalArguments
+          extend Bubot
+
+          watch :arguments do
+            #something
+          end
+
+          def arguments(foo, bar)
+            # do something
+          end
+        end
+
+        original_class = OriginalArguments.new
+        expect(original_class).to receive(:arguments_without_feature).with("foo", "bar")
+        original_class.arguments('foo', 'bar')
+
+      end
+
+      it "accepts the original methods block" do
+        class OriginalBlock
+          extend Bubot
+
+          watch :with_block do
+            #something
+          end
+
+          def with_block
+            yield(true)
+          end
+        end
+
+        original_class = OriginalBlock.new
+        block_called = false
+
+        original_class.with_block do |value|
+          block_called = value
+        end
+
+        expect(block_called).to be_true
+
+      end
     end
   end
 end
