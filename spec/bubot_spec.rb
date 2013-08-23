@@ -178,6 +178,24 @@ describe Bubot do
 
       end
 
+      it "accepts the original methods arguments" do
+        class OriginalArguments
+          extend Bubot
+
+          watch :arguments do
+            #something
+          end
+
+          def arguments(foo, bar)
+            # do soemthing
+          end
+        end
+
+        original_class = OriginalArguments.new
+        expect(original_class).to receive(:arguments_without_feature).with("foo", "bar")
+        original_class.arguments('foo', 'bar')
+
+      end
     end
   end
 end
