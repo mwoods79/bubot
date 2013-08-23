@@ -14,11 +14,11 @@ class Qux
   include Foo
   extend Bubot
 
-  watch :not_too_slow, 0.005 do
+  watch :not_too_slow, timeout: 0.005 do
     Baz.buz
   end
 
-  watch :too_slow, 0.005 do
+  watch :too_slow, timeout: 0.005 do
     Baz.buz
   end
 end
@@ -40,7 +40,7 @@ describe Bubot do
       it "watch is before the method" do
         class Before
           extend Bubot
-          watch(:next_method, 0.001) { Baz.buz }
+          watch(:next_method, timeout: 0.001) { Baz.buz }
           def next_method; sleep 0.002; end
         end
 
@@ -52,7 +52,7 @@ describe Bubot do
         class After
           extend Bubot
           def previous_method; sleep 0.002; end
-          watch(:previous_method, 0.001) { Baz.buz }
+          watch(:previous_method, timeout: 0.001) { Baz.buz }
         end
 
         Baz.should_receive(:buz).once
@@ -78,7 +78,7 @@ describe Bubot do
         expect do
           class MethodDoesNotExist
             extend Bubot
-            watch(:dont_exist, 0.001) { Baz.buz }
+            watch(:dont_exist, timeout: 0.001) { Baz.buz }
           end
         end.not_to raise_error
       end
@@ -94,7 +94,7 @@ describe Bubot do
 
         class PassesSelf
           extend Bubot
-          watch(:pass_self, 0.001) do |instance|
+          watch(:pass_self, timeout: 0.001) do |instance|
             RecievesSelfStrategy.execute(instance)
           end
           def pass_self; sleep 0.002; end
@@ -115,7 +115,7 @@ describe Bubot do
 
         class PassesTime
           extend Bubot
-          watch(:pass_time, 0.001) do |instance, time|
+          watch(:pass_time, timeout: 0.001) do |instance, time|
             RecievesTimeStrategy.execute(instance, time)
           end
           def pass_time; sleep 0.002; end
@@ -139,7 +139,7 @@ describe Bubot do
 
         class PassesReturnValue
           extend Bubot
-          watch(:pass_return_value, 0.001) do |instance, time, return_value|
+          watch(:pass_return_value, timeout: 0.001) do |instance, time, return_value|
             RecievesReturnValueStrategy.execute(instance, time, return_value)
           end
           def pass_return_value
@@ -156,6 +156,35 @@ describe Bubot do
         end
 
         bubot_observed.pass_return_value
+      end
+    end
+
+    describe "using a `with` strategy" do
+
+      it ":with" do
+        class RespondingStrategy
+          def self.call(method_name, timeout, method_return_value)
+            # do something
+          end
+        end
+
+        class UsingWith
+          extend Bubot
+
+          watch :original, with: RespondingStrategy
+
+          def original
+            "original value"
+          end
+        end
+
+        original_class = UsingWith.new
+        expect(RespondingStrategy).to receive(:call) do |instance, time, value|
+          expect(instance).to be(original_class)
+          expect(time).to be > 0
+          expect(value).to eq "original value"
+        end
+        original_class.original
       end
     end
 
