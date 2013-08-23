@@ -158,5 +158,26 @@ describe Bubot do
         bubot_observed.pass_return_value
       end
     end
+
+    describe "the original method" do
+      it "redefines the method to return the original value" do
+        class OriginalMethod
+          extend Bubot
+
+          watch :original do
+            #something
+          end
+
+          def original
+            "original value"
+          end
+        end
+
+        original_class = OriginalMethod.new
+        expect(original_class.original).to eql("original value")
+
+      end
+
+    end
   end
 end
