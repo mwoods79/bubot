@@ -123,7 +123,7 @@ describe Bubot do
 
         bubot_observed = PassesTime.new
         RecievesTimeStrategy.should_receive(:execute) do |instance, time|
-          expect(time).to be > 0.002
+          expect(time).to be > 0.001
           expect(instance).to be(bubot_observed)
         end
 
@@ -150,7 +150,7 @@ describe Bubot do
 
         bubot_observed = PassesReturnValue.new
         RecievesReturnValueStrategy.should_receive(:execute) do |instance, time, return_value|
-          expect(time).to be > 0.002
+          expect(time).to be > 0.001
           expect(instance).to be(bubot_observed)
           expect(return_value).to eq("return_value")
         end
@@ -181,7 +181,7 @@ describe Bubot do
         original_class = UsingWith.new
         expect(RespondingStrategy).to receive(:call) do |instance, time, value|
           expect(instance).to be(original_class)
-          expect(time).to be > 0
+          expect(time).to be >= 0
           expect(value).to eq "original value"
         end
         original_class.original
