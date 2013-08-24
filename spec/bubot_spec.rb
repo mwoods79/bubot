@@ -86,7 +86,7 @@ describe Bubot do
 
     context "sending messages to strategy" do
       it "passes its instance to the strategy" do
-        class RecievesSelfStrategy
+        class ReceivesSelfStrategy
           def self.execute(instance)
             # do stuff
           end
@@ -95,19 +95,19 @@ describe Bubot do
         class PassesSelf
           extend Bubot
           watch(:pass_self, timeout: 0.001) do |instance|
-            RecievesSelfStrategy.execute(instance)
+            ReceivesSelfStrategy.execute(instance)
           end
           def pass_self; sleep 0.002; end
         end
 
         bubot_observed = PassesSelf.new
-        RecievesSelfStrategy.should_receive(:execute).with(bubot_observed).once
+        ReceivesSelfStrategy.should_receive(:execute).with(bubot_observed).once
 
         bubot_observed.pass_self
       end
 
       it "passes the time it took to the strategy" do
-        class RecievesTimeStrategy
+        class ReceivesTimeStrategy
           def self.execute(instance, time)
             # do stuff
           end
@@ -116,13 +116,13 @@ describe Bubot do
         class PassesTime
           extend Bubot
           watch(:pass_time, timeout: 0.001) do |instance, time|
-            RecievesTimeStrategy.execute(instance, time)
+            ReceivesTimeStrategy.execute(instance, time)
           end
           def pass_time; sleep 0.002; end
         end
 
         bubot_observed = PassesTime.new
-        RecievesTimeStrategy.should_receive(:execute) do |instance, time|
+        ReceivesTimeStrategy.should_receive(:execute) do |instance, time|
           expect(time).to be > 0.001
           expect(instance).to be(bubot_observed)
         end
@@ -130,8 +130,8 @@ describe Bubot do
         bubot_observed.pass_time
       end
 
-      it "passes the returned value form the watched method" do
-        class RecievesReturnValueStrategy
+      it "passes the returned value from the watched method" do
+        class ReceivesReturnValueStrategy
           def self.execute(instance, time, original_value)
             # do stuff
           end
@@ -140,7 +140,7 @@ describe Bubot do
         class PassesReturnValue
           extend Bubot
           watch(:pass_return_value, timeout: 0.001) do |instance, time, return_value|
-            RecievesReturnValueStrategy.execute(instance, time, return_value)
+            ReceivesReturnValueStrategy.execute(instance, time, return_value)
           end
           def pass_return_value
             sleep 0.002
@@ -149,7 +149,7 @@ describe Bubot do
         end
 
         bubot_observed = PassesReturnValue.new
-        RecievesReturnValueStrategy.should_receive(:execute) do |instance, time, return_value|
+        ReceivesReturnValueStrategy.should_receive(:execute) do |instance, time, return_value|
           expect(time).to be > 0.001
           expect(instance).to be(bubot_observed)
           expect(return_value).to eq("return_value")
