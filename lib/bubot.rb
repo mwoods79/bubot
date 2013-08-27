@@ -10,7 +10,7 @@ module Bubot
 
       method_return_value = send("#{method_name}_without_feature".to_sym, *args, &block)
 
-      if (total_time = Time.now - start_time) > defaults[:timeout]
+      if (total_time = Time.now - start_time) >= defaults[:timeout]
         if options[:with]
           options[:with].call(self, total_time, method_return_value)
         else
