@@ -1,6 +1,7 @@
 # Bubot
 
-Take action when methods take too long
+Watch a method. If it takes longer than a specified amount of time,
+execute a block. It's a callback that only happens after a threshold.
 
 ## Installation
 
@@ -20,18 +21,53 @@ Or install it yourself as:
 
 Extend Bubot in your class.
 
-This gives you the class method `.watch(:method_name, threshold)`.
+This gives you the class method `.watch(:method_name, options)`.
 
-If a watched method takes longer than the specified amount of time (threshold), the block will execute.
+If a watched method takes longer than options[:timeout], the block will execute.
+Remember, the timeout is 0 by default so if you don't pass it a timeout, the
+block will always execute (like a callback)
+
+### Example
 
 ```ruby
-class Foo
+class WebAPI
     extend Bubot
 
-    watch(:bar, 1) { run_some_code }
+    watch(:response, timeout: 2) do |web_api_object, time_it_took, method_response|
+        puts web_api_object   # => web_api_object instance
+        puts time_it_took     # => 3.5 (seconds)
+        puts method_response  # => "body"
+    end
 
-    def bar
-        sleep 1.1
+    def response
+        sleep 3
+        "body"
+    end
+end
+```
+
+You can also pass any object that responds to `call` by using the `:with`
+option.
+
+```ruby
+class LoggingStrategy
+
+    def self.call(web_api_object, time_it_took, method_response)
+        puts web_api_object   # => web_api_object instance
+        puts time_it_took     # => 5.2 (seconds)
+        puts method_response  # => "body"
+    end
+
+end
+
+class WebAPI
+    extend Bubot
+
+    watch :response, timeout: 3, with: LoggingStrategy
+
+    def response
+        sleep 5
+        "body"
     end
 end
 ```
