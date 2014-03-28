@@ -1,48 +1,51 @@
 require "bubot/version"
+require "active_support/concern"
+require "active_support/callbacks"
+require "active_support/core_ext/module/aliasing"
 
 module Bubot
+  extend ActiveSupport::Concern
+  include ActiveSupport::Callbacks
 
-  def watch(method_name, options={})
-    defaults = { timeout: 0 }
-    defaults.merge!(options)
-    define_method("#{method_name}_with_feature") do |*args, &block|
-      start_time = Time.now
+  module ClassMethods
+    def watch(method_name, timeout: 0, with: nil, &block)
+      define_callbacks method_name
 
-      method_return_value = send("#{method_name}_without_feature".to_sym, *args, &block)
+      past_time_block = with || (block if block_given?)
 
-      if (total_time = Time.now - start_time) >= defaults[:timeout]
-        if options[:with]
-          options[:with].call(self, total_time, method_return_value)
-        else
-          yield(self, total_time, method_return_value)
+      define_method("#{method_name}_with_bubot") do |*args, &block|
+        run_callbacks method_name do
+          send("#{method_name}_without_bubot".to_sym, *args, &block)
         end
       end
 
-      method_return_value
+      alias_method_chain_or_register_for_chaining method_name
+
+      set_callback method_name, :around, ->(r, &block) do
+        start_time = Time.now
+
+        method_return_value = block.call
+
+        if (total_time = Time.now - start_time) >= timeout
+          past_time_block.call(self, total_time, method_return_value)
+        end
+      end
     end
 
-    alias_method_chain_or_register(method_name)
-  end
+    private
 
-  private
+    def alias_method_chain_or_register_for_chaining(method_name)
+      if method_defined?(method_name)
+        alias_method_chain(method_name, :bubot)
+      else
+        (@method_names ||= []).push(method_name)
+      end
+    end
 
-  def alias_method_chain_or_register(method_name)
-    if method_defined?(method_name)
-      alias_method_chain(method_name)
-    else
-      (@method_names ||= []).push(method_name)
+    def method_added(method_name)
+      if (@method_names ||= []).delete(method_name)
+        alias_method_chain(method_name, :bubot)
+      end
     end
   end
-
-  def method_added(method_name)
-    if (@method_names ||= []).delete(method_name)
-      alias_method_chain(method_name)
-    end
-  end
-
-  def alias_method_chain(method_name)
-    alias_method "#{method_name}_without_feature".to_sym, method_name
-    alias_method  method_name, "#{method_name}_with_feature".to_sym
-  end
-
 end

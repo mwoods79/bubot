@@ -31,7 +31,7 @@ block will always execute (like a callback)
 
 ```ruby
 class WebAPI
-    extend Bubot
+    include Bubot
 
     watch(:response, timeout: 2) do |web_api_object, time_it_took, method_response|
         puts web_api_object   # => web_api_object instance
@@ -61,7 +61,7 @@ class LoggingStrategy
 end
 
 class WebAPI
-    extend Bubot
+    include Bubot
 
     watch :response, timeout: 3, with: LoggingStrategy
 

@@ -12,7 +12,7 @@ end
 
 class Qux
   include Foo
-  extend Bubot
+  include Bubot
 
   watch :not_too_slow, timeout: 0.005 do
     Baz.buz
@@ -39,7 +39,7 @@ describe Bubot do
 
       it "watch is before the method" do
         class Before
-          extend Bubot
+          include Bubot
           watch(:next_method, timeout: 0.001) { Baz.buz }
           def next_method; sleep 0.002; end
         end
@@ -50,7 +50,7 @@ describe Bubot do
 
       it "watch is after the method" do
         class After
-          extend Bubot
+          include Bubot
           def previous_method; sleep 0.002; end
           watch(:previous_method, timeout: 0.001) { Baz.buz }
         end
@@ -63,7 +63,7 @@ describe Bubot do
     context "timeout is optional" do
       it "timeout is not passed" do
         class NoTimeout
-          extend Bubot
+          include Bubot
           watch(:without_timeout) { Baz.buz }
           def without_timeout() end
         end
@@ -77,7 +77,7 @@ describe Bubot do
       it "does nothing and does not break" do
         expect do
           class MethodDoesNotExist
-            extend Bubot
+            include Bubot
             watch(:dont_exist, timeout: 0.001) { Baz.buz }
           end
         end.not_to raise_error
@@ -93,7 +93,7 @@ describe Bubot do
         end
 
         class PassesSelf
-          extend Bubot
+          include Bubot
           watch(:pass_self, timeout: 0.001) do |instance|
             ReceivesSelfStrategy.execute(instance)
           end
@@ -114,7 +114,7 @@ describe Bubot do
         end
 
         class PassesTime
-          extend Bubot
+          include Bubot
           watch(:pass_time, timeout: 0.001) do |instance, time|
             ReceivesTimeStrategy.execute(instance, time)
           end
@@ -138,7 +138,7 @@ describe Bubot do
         end
 
         class PassesReturnValue
-          extend Bubot
+          include Bubot
           watch(:pass_return_value, timeout: 0.001) do |instance, time, return_value|
             ReceivesReturnValueStrategy.execute(instance, time, return_value)
           end
@@ -169,7 +169,7 @@ describe Bubot do
         end
 
         class UsingWith
-          extend Bubot
+          include Bubot
 
           watch :original, with: RespondingStrategy
 
@@ -191,7 +191,7 @@ describe Bubot do
     describe "the original method" do
       it "redefines the method to return the original value" do
         class OriginalMethod
-          extend Bubot
+          include Bubot
 
           watch :original do
             #something
@@ -209,7 +209,7 @@ describe Bubot do
 
       it "accepts the original methods arguments" do
         class OriginalArguments
-          extend Bubot
+          include Bubot
 
           watch :arguments do
             #something
@@ -221,14 +221,14 @@ describe Bubot do
         end
 
         original_class = OriginalArguments.new
-        expect(original_class).to receive(:arguments_without_feature).with("foo", "bar")
+        expect(original_class).to receive(:arguments_without_bubot).with("foo", "bar")
         original_class.arguments('foo', 'bar')
 
       end
 
       it "accepts the original methods block" do
         class OriginalBlock
-          extend Bubot
+          include Bubot
 
           watch :with_block do
             #something
