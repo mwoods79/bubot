@@ -3,6 +3,10 @@
 Watch a method. If it takes longer than a specified amount of time,
 execute a block. It's a callback that only happens after a threshold.
 
+## Requirements
+
+    ruby > 2.0.0
+
 ## Installation
 
 Add this line to your application's Gemfile:
