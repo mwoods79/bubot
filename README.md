@@ -35,18 +35,18 @@ block will always execute (like a callback)
 
 ```ruby
 class WebAPI
-    include Bubot
+  include Bubot
 
-    watch(:response, timeout: 2) do |web_api_object, time_it_took, method_response|
-        puts web_api_object   # => web_api_object instance
-        puts time_it_took     # => 3.5 (seconds)
-        puts method_response  # => "body"
-    end
+  watch(:response, timeout: 2) do |web_api_object, time_it_took, method_response|
+    puts web_api_object   # => web_api_object instance
+    puts time_it_took     # => 3.5 (seconds)
+    puts method_response  # => "body"
+  end
 
-    def response
-        sleep 3
-        "body"
-    end
+  def response
+    sleep 3
+    "body"
+  end
 end
 ```
 
@@ -56,22 +56,22 @@ option.
 ```ruby
 class LoggingStrategy
 
-    def self.call(web_api_object, time_it_took, method_response)
-        puts web_api_object   # => web_api_object instance
-        puts time_it_took     # => 5.2 (seconds)
-        puts method_response  # => "body"
-    end
+  def self.call(web_api_object, time_it_took, method_response)
+    puts web_api_object   # => web_api_object instance
+    puts time_it_took     # => 5.2 (seconds)
+    puts method_response  # => "body"
+  end
 
 end
 
 class WebAPI
-    include Bubot
+  include Bubot
 
-    watch :response, timeout: 3, with: LoggingStrategy
+  watch :response, timeout: 3, with: LoggingStrategy
 
-    def response
-        sleep 5
-        "body"
-    end
+  def response
+    sleep 5
+    "body"
+  end
 end
 ```
