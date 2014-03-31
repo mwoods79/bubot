@@ -8,20 +8,17 @@ module Bubot
   include ActiveSupport::Callbacks
 
   module ClassMethods
+    def bubot(before_after_around, method_name, callback=nil, &block)
+      configure_bubot method_name
+      set_callback(method_name, before_after_around, (callback || block))
+    end
+
     def watch(method_name, timeout: 0, with: nil, &block)
-      define_callbacks method_name
+      configure_bubot method_name
 
       past_time_block = with || (block if block_given?)
 
-      define_method("#{method_name}_with_bubot") do |*args, &block|
-        run_callbacks method_name do
-          send("#{method_name}_without_bubot".to_sym, *args, &block)
-        end
-      end
-
-      alias_method_chain_or_register_for_chaining method_name
-
-      set_callback method_name, :around, ->(r, &block) do
+      set_callback method_name, :around, ->(instance, &block) do
         start_time = Time.now
 
         method_return_value = block.call
@@ -33,6 +30,21 @@ module Bubot
     end
 
     private
+
+    def configure_bubot(method_name)
+      method_name_with_bubot = "#{method_name}_with_bubot".to_sym
+      return if instance_methods.include? method_name_with_bubot
+
+      define_callbacks method_name
+
+      define_method(method_name_with_bubot) do |*args, &block|
+        run_callbacks method_name do
+          send("#{method_name}_without_bubot".to_sym, *args, &block)
+        end
+      end
+
+      alias_method_chain_or_register_for_chaining method_name
+    end
 
     def alias_method_chain_or_register_for_chaining(method_name)
       if method_defined?(method_name)
