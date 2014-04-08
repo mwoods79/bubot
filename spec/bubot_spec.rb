@@ -6,8 +6,7 @@ end
 
 module Foo
   def not_too_slow; end
-  def too_slow; sleep 0.006
-  end
+  def too_slow; sleep 0.006 end
 end
 
 class Qux
@@ -23,40 +22,7 @@ class Qux
   end
 end
 
-class CallbackTester
-  include Bubot
-
-  bubot :before, :save, :update
-  bubot :around, :save, ->(instance, &block) { instance.do_other_stuff; block.call }
-  bubot(:after, :save) do
-    Baz.buz
-  end
-
-  def update; end
-  def save; end
-  def do_other_stuff; end
-end
-
 describe Bubot do
-  describe ".bubot" do
-    subject(:callbacks) { CallbackTester.new }
-    it "allows a method to be executed before another method" do
-      expect(callbacks).to receive(:update).once
-      callbacks.save
-    end
-
-    it "allows a block to be executed as a callback" do
-      expect(Baz).to receive(:buz).once
-      callbacks.save
-    end
-
-    it "allows a lambda to be executed as a callback" do
-      expect(callbacks).to receive(:do_other_stuff).once
-      callbacks.save
-    end
-
-  end
-
   describe ".watch" do
     it "calls the strategy(block) when the time exceeds the max time" do
       Baz.should_receive(:buz).once
@@ -248,15 +214,13 @@ describe Bubot do
             #something
           end
 
-          def arguments(foo, bar)
-            # do something
+          def arguments(a, b)
+            a + b
           end
         end
 
         original_class = OriginalArguments.new
-        expect(original_class).to receive(:arguments_without_bubot).with("foo", "bar")
-        original_class.arguments('foo', 'bar')
-
+        expect(original_class.arguments('foo', 'bar')).to eq('foobar')
       end
 
       it "accepts the original methods block" do

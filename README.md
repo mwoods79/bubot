@@ -31,8 +31,6 @@ If a watched method takes longer than options[:timeout], the block will execute.
 Remember, the timeout is 0 by default so if you don't pass it a timeout, the
 block will always execute (like an after callback).
 
-Also, as a bonus, you get `.bubot`, which is syntactic sugar for active support callbacks.
-
 ### Example
 
 ```ruby
@@ -48,21 +46,6 @@ class WebAPI
   def response
     sleep 3
     "body"
-  end
-
-  # Syntactic sugar for active support callbacks
-  bubot :before, :save, :udpate
-  bubot :around, :save, ->(instance, &block) { puts "Before"; block.call; puts "All Done" }
-  bubot :after, :save do
-    puts "Another thing to do after"
-  end
-
-  def save
-    puts "Saving..."
-  end
-
-  def update
-    puts "Updating..."
   end
 end
 ```
